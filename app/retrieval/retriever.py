@@ -16,11 +16,19 @@ def retrieve(query, top_k=5):
     retrieved_chunks = []
 
     for result in results:
-
-        retrieved_chunks.append({
-            "score": result.score,
-            "text": result.payload["text"],
-            "source": result.payload["source"]
-        })
+        pl = result.payload or {}
+        chunk_id = pl.get("chunk_id") or str(result.id)
+        retrieved_chunks.append(
+            {
+                "chunk_id": chunk_id,
+                "score": float(result.score) if result.score is not None else None,
+                "text": pl.get("text", ""),
+                "source": pl.get("source", ""),
+                "page": pl.get("page"),
+                "document_id": pl.get("document_id"),
+                "filename": pl.get("filename"),
+                "retrieval_channel": "dense",
+            }
+        )
 
     return retrieved_chunks

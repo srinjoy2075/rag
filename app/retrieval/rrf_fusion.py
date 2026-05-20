@@ -1,8 +1,5 @@
 from collections import defaultdict
 
-from app.retrieval.retriever import retrieve
-from app.retrieval.bm25_retriever import bm25_retrieve
-
 
 def reciprocal_rank_fusion(results_lists, k=60):
 

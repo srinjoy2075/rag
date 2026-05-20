@@ -12,3 +12,5 @@ typesense
 langchain_openai
 langgraph
 qdrant-client
+rank-bm25
+python-multipart

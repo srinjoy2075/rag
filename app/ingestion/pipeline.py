@@ -28,7 +28,7 @@ def run_pipeline():
     texts = [chunk.page_content for chunk in chunks]
 
     print("Generating embeddings...")
-    embeddings = generate_embeddings(texts)
+    embeddings = generate_embeddings(texts, show_progress_bar=True)
 
     vector_size = len(embeddings[0])
 

@@ -1,48 +1,27 @@
-from rank_bm25 import BM25Okapi
+from __future__ import annotations
 
-from app.ingestion.loader import load_documents
-from app.ingestion.chunking_strategy import chunk_documents
-
-
-documents = load_documents()
-
-chunks = chunk_documents(
-    documents,
-    strategy="fixed",
-    chunk_size=500,
-    chunk_overlap=50
-)
-
-chunk_texts = [
-    chunk.page_content for chunk in chunks
-]
-
-tokenized_corpus = [
-    text.split() for text in chunk_texts
-]
-
-bm25 = BM25Okapi(tokenized_corpus)
+from app.corpus_state import get_bm25, get_chunks_snapshot
 
 
-def bm25_retrieve(query, top_k=5):
+def bm25_retrieve(query: str, top_k: int = 5) -> list[dict]:
+    bm25 = get_bm25()
+    chunks = get_chunks_snapshot()
+    if bm25 is None or not chunks:
+        return []
 
     tokenized_query = query.split()
-
     scores = bm25.get_scores(tokenized_query)
-
     ranked = sorted(
-        zip(chunk_texts, scores),
+        enumerate(scores),
         key=lambda x: x[1],
-        reverse=True
-    )
+        reverse=True,
+    )[:top_k]
 
-    results = []
-
-    for text, score in ranked[:top_k]:
-
-        results.append({
-            "score": float(score),
-            "text": text
-        })
+    results: list[dict] = []
+    for idx, score in ranked:
+        row = dict(chunks[idx])
+        row["score"] = float(score)
+        row["retrieval_channel"] = "bm25"
+        results.append(row)
 
     return results
